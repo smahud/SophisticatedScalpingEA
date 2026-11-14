@@ -1,0 +1,6 @@
+# Symbol scanner and MT5 native dashboard
+Discover SymbolsTotal(false), SymbolName(i,false), SYMBOL_CURRENCY_BASE/PROFIT, trade mode and path; distinguish eligible FX from CFDs, metals, crypto; SymbolSelect(symbol,true), log failures. Broker suffixes accepted. Optional all/MarketWatch/allowlist scopes; MaxSymbols, scheduling priority and per-symbol resource limits. No ChartOpen needed.
+Per-symbol: indicator handles, last bar, last tick, stale flag, spread, regime, signal, AI decision, exposure, cooldown, error state. Refresh catalog periodically, throttle history requests, scan with fair round-robin. Dashboard redraw throttled separately.
+On-chart panel: account equity/drawdown, connected backend status, monitored/ready/stale counts, top-ranked signals, open positions, global currency exposure, last errors, kill switch and mode SHADOW/DEMO/LIVE. Pagination/filter for large catalogs; chart objects with unique prefix, cleanup only owned objects.
+Dashboard actions never bypass risk gate. Distinguish model estimates from actual trade outcomes. Recovery after MT5 restart and reconnect.
+Acceptance: 1/10/30/60+ symbols, suffixes, disabled symbols, missing history, stale quotes, simultaneous signals, UI responsiveness and CPU/memory budget evidence.
