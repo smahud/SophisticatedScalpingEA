@@ -1,0 +1,5 @@
+# Security and reliability threat model
+Assets: broker funds, trade permissions, terminal state, backend tokens, model credentials, market/trade logs. Trust boundary: EA -> advisory service -> Wrappers -> third-party models. Treat model output as untrusted external input. No model can call trade API or edit EA risk policy.
+Controls: least-privilege backend, localhost binding by default, TLS+auth for remote, rotate tokens, secret redaction, request size/rate limits, replay nonce, schema validation, bounded model response and deadlines, audit integrity, provider/model pinning.
+Failure modes: backend outage, partial response, prompt injection from external text, stale price, quote gap, terminal disconnect, duplicate request, clock skew, wrong account mode, broker rejects, corrupted persisted state, resource exhaustion. Default REJECT new AI-gated trades; preserve broker-side protective stops.
+Security tests: unauthorized request 401, malformed JSON 400, stale TTL, wrong signal ID, risk_multiplier>1, oversized request, delayed provider, replay, model disagreement, cross-account signal, secrets absent from logs. No public unsecured decision endpoint.
