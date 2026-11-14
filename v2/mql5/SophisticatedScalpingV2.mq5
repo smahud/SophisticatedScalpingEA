@@ -25,8 +25,8 @@ double pendingSpread = 0, pendingATR = 0, pendingADX = 0;
 
 bool Approved(const string json, const string signalId)
 {
-   return StringFind(json, "\\"signal_id\\":\\"" + signalId + "\\"") >= 0 &&
-          StringFind(json, "\\"decision\\":\\"APPROVE\\"") >= 0;
+   return StringFind(json, "\"signal_id\":\"" + signalId + "\"") >= 0 &&
+          StringFind(json, "\"decision\":\"APPROVE\"") >= 0;
 }
 void OnTimer()
 {
@@ -35,7 +35,7 @@ void OnTimer()
    pendingSignal = ""; // consume once, including failures
    if(TimeCurrent() - pendingTimestamp > 20) { Print("Decision expired: ", id); return; }
    if(DecisionToken == "") { Print("Decision token missing; fail closed"); return; }
-   string payload = StringFormat("{\\"signal_id\\":\\"%s\\",\\"symbol\\":\\"%s\\",\\"side\\":\\"%s\\",\\"timestamp\\":%I64d,\\"ttl_seconds\\":20,\\"spread_points\\":%.4f,\\"atr_points\\":%.4f,\\"adx\\":%.4f}",
+   string payload = StringFormat("{\"signal_id\":\"%s\",\"symbol\":\"%s\",\"side\":\"%s\",\"timestamp\":%I64d,\"ttl_seconds\":20,\"spread_points\":%.4f,\"atr_points\":%.4f,\"adx\":%.4f}",
       id, pendingSymbol, pendingSide, (long)TimeGMT(), pendingSpread, pendingATR, pendingADX);
    char body[], response[];
    StringToCharArray(payload, body, 0, StringLen(payload), CP_UTF8);
