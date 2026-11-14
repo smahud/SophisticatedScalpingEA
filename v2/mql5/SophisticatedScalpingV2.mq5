@@ -8,11 +8,49 @@ input int ADXPeriod = 14;
 input int ATRPeriod = 14;
 input double MinADX = 22.0;
 input double MaxSpreadATRRatio = 0.12;
+input bool UseDecisionServer = false;
+input string DecisionURL = "http://127.0.0.1:8765/v1/decision";
+input string DecisionToken = ""; // never store production secrets in shared presets
+input int DecisionTimeoutMs = 700;
 input bool EnableTrading = false; // intentionally unsupported: safe shadow-only prototype
 
 int hFast = INVALID_HANDLE, hSlow = INVALID_HANDLE;
 int hADX = INVALID_HANDLE, hATR = INVALID_HANDLE;
 datetime lastClosedBar = 0;
+string pendingSignal = "";
+string pendingSymbol = "";
+string pendingSide = "";
+datetime pendingTimestamp = 0;
+double pendingSpread = 0, pendingATR = 0, pendingADX = 0;
+
+string JsonText(const string s) { return "\\"" + s + "\\""; }
+bool Approved(const string json, const string signalId)
+{
+   return StringFind(json, "\\"signal_id\\":\\"" + signalId + "\\"") >= 0 &&
+          StringFind(json, "\\"decision\\":\\"APPROVE\\"") >= 0;
+}
+void OnTimer()
+{
+   if(!UseDecisionServer || pendingSignal == "") return;
+   string id = pendingSignal;
+   pendingSignal = ""; // consume once, including failures
+   if(TimeCurrent() - pendingTimestamp > 20) { Print("Decision expired: ", id); return; }
+   if(DecisionToken == "") { Print("Decision token missing; fail closed"); return; }
+   string payload = StringFormat("{\\"signal_id\\":\\"%s\\",\\"symbol\\":\\"%s\\",\\"side\\":\\"%s\\",\\"timestamp\\":%I64d,\\"ttl_seconds\\":20,\\"spread_points\\":%.4f,\\"atr_points\\":%.4f,\\"adx\\":%.4f}",
+      id, pendingSymbol, pendingSide, (long)TimeGMT(), pendingSpread, pendingATR, pendingADX);
+   char body[], response[];
+   StringToCharArray(payload, body, 0, StringLen(payload), CP_UTF8);
+   string headers = "Content-Type: application/json\\r\\nAuthorization: Bearer " + DecisionToken + "\\r\\n";
+   string responseHeaders;
+   ResetLastError();
+   int status = WebRequest("POST", DecisionURL, headers, DecisionTimeoutMs, body, response, responseHeaders);
+   if(status != 200) { PrintFormat("Decision unavailable HTTP=%d err=%d; fail closed", status, GetLastError()); return; }
+   string result = CharArrayToString(response, 0, -1, CP_UTF8);
+   // Deliberately informational only. Robust JSON schema validation and trade
+   // execution are separate release gates.
+   PrintFormat("ADVISORY %s %s raw=%s", id, Approved(result,id) ? "APPROVE" : "NOT_APPROVED", result);
+}
+
 
 int OnInit()
 {
@@ -29,7 +67,7 @@ int OnInit()
    if(hFast == INVALID_HANDLE || hSlow == INVALID_HANDLE ||
       hADX == INVALID_HANDLE || hATR == INVALID_HANDLE)
       return INIT_FAILED;
-   Print("V2 analytical shadow engine initialized for ", _Symbol);
+   EventSetTimer(1);\n   Print("V2 analytical shadow engine initialized for ", _Symbol);
    return INIT_SUCCEEDED;
 }
 
@@ -76,6 +114,16 @@ void OnTick()
                side, eligible ? "true" : "false",
                TimeToString(closed, TIME_DATE|TIME_SECONDS),
                fast, slow, adx, atrPts, spreadPts);
+   if(eligible && UseDecisionServer && pendingSignal == "")
+   {
+      pendingSymbol = _Symbol;
+      pendingSide = side;
+      pendingTimestamp = TimeCurrent();
+      pendingSpread = spreadPts;
+      pendingATR = atrPts;
+      pendingADX = adx;
+      pendingSignal = _Symbol + "_" + IntegerToString((long)closed) + "_" + side;
+   }
    // No order functions intentionally. Next stage: immutable signal contract and
    // asynchronous advisory bridge; risk validation and broker execution remain separate.
 }
