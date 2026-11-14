@@ -1,0 +1,7 @@
+# Binding execution contract for coding/review agents
+Mission: deliver working V2 incrementally, never claim full production readiness without proof. Read docs/README.md and all numbered docs first, inspect actual repository HEAD, report mismatches. Follow branch audit/end-to-end-ai-wrapper-20261115 or a new feature branch; do NOT commit to main, merge, deploy or trade live without explicit user authorization.
+Roles: architecture reviewer, MQL5 implementer, Python/AI implementer, QA/backtest reviewer, security/risk reviewer. Where subagents available, use independent reviewers; otherwise record limitation.
+Each task: inspect -> plan -> implement smallest module -> tests -> independent review -> report -> commit -> next task. Report in report/YYYY-MM-DD-<task>.md includes HEAD before/after, files, commands, results, failures, risks, next gate. Never fabricate tests or runtime metrics. Avoid overengineering and scope creep.
+Keep legacy EA intact; V2 under v2/. Do not edit third-party wrappers repository or frozen upstream providers. Check source licenses before copying. Do not expose API keys or account identifiers.
+Priority: data correctness, risk, deterministic testing, resilience, then AI optimization. Every code change has acceptance criteria, negative tests and rollback.
+No live trade, no real-money credentials, no auto-enable execution. Clarify broker/account constraints before live deployment.
