@@ -1,0 +1,6 @@
+# MT5-only operation and headless backend
+User sees only MT5. Install EA on one chart; configure symbol scope, risk, AI mode; permit WebRequest URL under MT5 Tools > Options > Expert Advisors only after endpoint security review. Enable Algo Trading only after gates and demo validation.
+Backend Python/Wrappers may run on same Windows host or private VPS; MT5 localhost refers to MT5 host, not remote VPS. Remote backend requires authenticated TLS, allowlist/firewall and secrets management. Python service startup/restart supervision and health checks, separate logs, version pinning and model config. Never embed credentials in source or publish .set secrets.
+On MT5 startup: enumerate symbols, warm histories, restore state, reconcile positions, mark stale until ready. Shutdown: release handles and dashboard objects without deleting unrelated globals. Crash: fail closed for new entries, existing positions rely on broker-side stops and local management on recovery.
+Ops commands: Python unit tests, local service start, MT5 compile and Strategy Tester instructions; document broker-specific requirements. Emergency stop disables new trades and manages existing positions safely.
+Rollout: shadow -> demo -> reviewed limited live. Backout: disable AI/new entries, revert version, preserve audit and position state.
