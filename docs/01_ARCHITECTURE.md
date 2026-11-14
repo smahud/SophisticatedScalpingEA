@@ -1,0 +1,7 @@
+# Architecture and module boundaries
+MT5: V2MainEA.mq5 -> SymbolCatalog -> MarketDataCache -> RegimeDetector -> independent Strategy modules -> SignalFusion -> OpportunityQueue -> DecisionBridge -> GlobalRiskGuard -> OrderExecutor/PositionManager -> OnChartDashboard -> AuditLogger.
+Python background: Decision API -> exact-model Wrappers clients -> parallel bounded model inference -> quorum/aggregation -> strict response. Wrappers remains provider gateway, not trading engine.
+OnTimer round-robin symbol scan with bounded per-event budget; OnTick of controller symbol is not a reliable event source for other symbols. One EA event loop is serialized. For tick-sensitive cases use CopyTicks/CopyTicksRange with checkpoints, detect gaps and measure cost. Cache indicator handles per symbol/timeframe; release on shutdown; use closed bars for default signals.
+Separate trade-critical logic from UI and networking; local position protection must continue if backend offline. No direct external model calls in MQL5. WebRequest is synchronous and unsupported in Strategy Tester: design a deterministic replay adapter. The current bridge is informational prototype and NOT a trading authorization parser.
+States: DISCOVERED, SYNCING, READY, STALE, DISABLED; signals: CANDIDATE, PENDING_AI, APPROVED, REJECTED, EXPIRED, EXECUTED, FAILED. Persist stable signal IDs and recovery checkpoints.
+Version every strategy, signal schema, model config, risk policy and experiment.
