@@ -23,7 +23,6 @@ string pendingSide = "";
 datetime pendingTimestamp = 0;
 double pendingSpread = 0, pendingATR = 0, pendingADX = 0;
 
-string JsonText(const string s) { return "\\"" + s + "\\""; }
 bool Approved(const string json, const string signalId)
 {
    return StringFind(json, "\\"signal_id\\":\\"" + signalId + "\\"") >= 0 &&
@@ -40,7 +39,7 @@ void OnTimer()
       id, pendingSymbol, pendingSide, (long)TimeGMT(), pendingSpread, pendingATR, pendingADX);
    char body[], response[];
    StringToCharArray(payload, body, 0, StringLen(payload), CP_UTF8);
-   string headers = "Content-Type: application/json\\r\\nAuthorization: Bearer " + DecisionToken + "\\r\\n";
+   string headers = "Content-Type: application/json\r\nAuthorization: Bearer " + DecisionToken + "\r\n";
    string responseHeaders;
    ResetLastError();
    int status = WebRequest("POST", DecisionURL, headers, DecisionTimeoutMs, body, response, responseHeaders);
@@ -67,7 +66,8 @@ int OnInit()
    if(hFast == INVALID_HANDLE || hSlow == INVALID_HANDLE ||
       hADX == INVALID_HANDLE || hATR == INVALID_HANDLE)
       return INIT_FAILED;
-   EventSetTimer(1);\n   Print("V2 analytical shadow engine initialized for ", _Symbol);
+   EventSetTimer(1);
+   Print("V2 analytical shadow engine initialized for ", _Symbol);
    return INIT_SUCCEEDED;
 }
 
