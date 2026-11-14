@@ -1,0 +1,5 @@
+# Data collection, metrics and profit evaluation
+Opportunity ledger records every eligible and rejected candidate with timestamp, symbol, timeframe, strategy/regime, features, spread/ATR, AI votes, decisions, risk caps, broker execution and eventual outcome. Use bounded retention and no secret/account identifier leakage.
+Data quality: closed bar timestamps, broker timezone to UTC, symbol suffixes, missing history, stale quotes, tick capture gaps, adjusted contract/tick value, commission, swap, spread, slippage. Document historical source and survivorship bias.
+Evaluate net expectancy per trade and portfolio, max drawdown, downside tail, profit factor, win rate with trade count and confidence intervals, exposure, turnover, risk-adjusted return, stability across broker/symbol/regime. Pre-register optimization space; nested walk-forward; untouched OOS; forward demo. Avoid leakage and multiple-comparison overfitting.
+AI ablation: baseline no AI, deterministic filter, one model, multi-model ensemble under same signals and realistic latency/cost; include all declined trades and missed opportunities. Do not optimize on live account.
